@@ -1,0 +1,17 @@
+{
+  "author": "Robert McBride <robmcbride@gmail.com> (http://mrexception.com)",
+  "name": "tvt-rss",
+  "description": "An rss parser and downloader for the website tvtorrents.com",
+  "version": "0.0.1",
+  "homepage": "https://github.com/MrException/tvt-rss",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/MrException/tvt-rss.git"
+  },
+  "dependencies": {},
+  "devDependencies": {},
+  "optionalDependencies": {},
+  "engines": {
+    "node": "*"
+  }
+}
