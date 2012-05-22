@@ -1,40 +1,3 @@
-///////////////////////////// START SETTINGS//{{{
-// NOTE: right now this is highly dependent on tvtorrents.com
-//
-// the url the rss feed is at
-var url = "http://www.tvtorrents.com/mytaggedRSS?digest=9eb619c42f819ecb144ef88181b88a278c226ca0&hash=73f3f27ece46767294cf91133cfc81d6165a1e58";
-
-// where to save the files
-var dir = "/home/rob/Projects/rss/test/";
-
-// the filename to save the index to
-var indexFile = "index.json";
-
-// location of wget - NOTE: will probably remove this dep
-var wget = "/usr/bin/wget";
-
-// minutes between each run
-var interval = 5;
-
-// should this download full seasons?
-var season = false;
-
-// an array of regexes to run against the file name if the filename matches ANY
-// of these regexes, then the file will be skipped
-var regFalse = [
-  new RegExp("avi$"),
-  new RegExp("720p","i"),
-  new RegExp("1080"),
-  new RegExp("nuked","i")
-];
-
-// an array of regexes to run against the file name the filename must match ALL
-// of these, or it will be skipped
-var regTrue = [
-  new RegExp(".*")
-];
-////////////////////////////// END SETTINGS//}}}
-
 var request = require("request");
 var parser = require("xml2json");
 var util = require("util");
@@ -42,14 +5,17 @@ var exec = require("child_process").exec;
 var fs = require("fs");
 var _ = require("underscore");
 
-// this will hold all of the shows we have seen so far
-var index;
-
+// TODO: read this from an argument
+var configFileName = "config.json";
+var config;
 function run() {//{{{
-  index = readIndex();
+  config = readConfig();
+  console.log(config);
+
+  var index = readIndex(config.indexFile);
   console.log(index);
 
-  request(url, function(error, response, xml) {
+  request(config.url, function(error, response, xml) {
     if (!error && response.statusCode === 200) {
       var json = parser.toJson(xml, { object: true });
       var showsRaw = json.rss.channel.item;
@@ -89,20 +55,23 @@ function makeDescObj(desc, url) {//{{{
 }//}}}
 
 function filter(show) {//{{{
-  if (!season && (/all/i).test(show.episode)) {
+  if (!config.season && (/all/i).test(show.episode)) {
     return false;
   }
 
   var pass = true;
-  _.each(regFalse, function(reg) {
-    if (reg.test(show.file)) {
+  var re;
+  _.each(config.regFalse, function(reg) {
+    re = new RegEx(reg, "i");
+    if (re.test(show.file)) {
       pass = false;
     }
   });
 
   if (pass) {
-    _.each(regTrue, function(reg) {
-      if (!reg.test(show.title)) {
+    _.each(config.regTrue, function(reg) {
+      re = new RegEx(reg, "i");
+      if (!re.test(show.title)) {
         pass = false;
       }
     });
@@ -153,7 +122,7 @@ function runIndex(shows) {//{{{
 }//}}}
 
 function download(show) {//{{{
-  var command = wget + " -O '" + dir + show.file + "' '" + show.url + "'";
+  var command = config.wget + " -O '" + config.dir + show.file + "' '" + show.url + "'";
   console.log(command);
   var child = exec(command, function(error, stdout, stderr) {
     console.log("stdout: " + stdout);
@@ -169,7 +138,7 @@ function readIndex() {
   // -file not there
   // -file has bad content
   var index = {};
-  var data = fs.readFileSync(__dirname + "/" + indexFile, "utf8");
+  var data = fs.readFileSync(__dirname + "/" + config.indexFile, "utf8");
   if (data.length) {
     index = JSON.parse(data);
   }
@@ -179,8 +148,23 @@ function readIndex() {
   return index;
 }
 
+function readConfig() {
+  // need to check special cases:
+  // -file not there
+  // -file has bad content
+  var config = {};
+  var data = fs.readFileSync(__dirname + "/" + configFileName, "utf8");
+  if (data.length) {
+    config = JSON.parse(data);
+  }
+  else {
+    console.log("config file empty");
+  }
+  return config;
+}
+
 function writeIndex() {
-  fs.writeFileSync(__dirname + "/" + indexFile, JSON.stringify(index));
+  fs.writeFileSync(__dirname + "/" + config.indexFile, JSON.stringify(index));
   return true;
 }
 

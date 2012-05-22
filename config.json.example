@@ -1,0 +1,38 @@
+{
+  // NOTE: right now this is highly dependent on tvtorrents.com
+  //
+  // the url the rss feed is at
+  "url": "http://www.tvtorrents.com/mytaggedRSS?digest=xxxxx&hash=xxxxx",
+
+  // where to save the files
+  "dir": "./torrents/",
+
+  // the filename to save the index to
+  "indexFile": "index.json",
+
+  // location of wget - NOTE: will probably remove this dep
+  "wget": "/usr/bin/wget",
+
+  // minutes between each run
+  "interval": 5,
+
+  // should this download full seasons?
+  "season": false,
+
+  // an array of regexes to run against the file name if the filename matches ANY
+  // of these regexes, then the file will be skipped, these are always run with
+  // the ignore case flag
+  "regFalse": [
+    "avi$",
+    "720p",
+    "1080",
+    "nuked",
+  ],
+
+  // an array of regexes to run against the file name the filename must match ALL
+  // of these, or it will be skipped, these are always run with the ignore case
+  // flag
+  "regTrue": [
+    ".*"
+  ],
+}
