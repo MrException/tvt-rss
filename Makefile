@@ -4,6 +4,6 @@ PATH := ./node_modules/.bin/:${PATH}
 test:
 	@mocha \
 		--reporter $(REPORTER) \
-		tests/*.js
+		test/*.js
 
 .PHONY: test
