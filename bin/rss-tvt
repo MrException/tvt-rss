@@ -1,0 +1,23 @@
+#!/usr/bin/env node
+
+var fs = require("fs");
+
+// TODO: read this from an argument
+var configFileName = "../config.json";
+
+// need to check special cases:
+// -file not there
+// -file has bad content
+var config = {};
+var data = fs.readFileSync(__dirname + "/" + configFileName, "utf8");
+if (data.length) {
+  config = JSON.parse(data);
+}
+else {
+  console.log("config file empty");
+}
+
+console.log(config);
+
+var RSS = require("../").RSS;
+(new RSS(config)).run();
