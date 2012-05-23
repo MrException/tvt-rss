@@ -8,11 +8,9 @@ var _ = require("underscore");
 // TODO: read this from an argument
 var configFileName = "config.json";
 var config;
-function run() {//{{{
-  config = readConfig();
-  console.log(config);
-
-  var index = readIndex(config.indexFile);
+var index;
+function run() {
+  index = readIndex(config.indexFile);
   console.log(index);
 
   request(config.url, function(error, response, xml) {
@@ -29,13 +27,13 @@ function run() {//{{{
 
       shows = runIndex(shows);
 
-      //_.each(shows, download);
-      //console.log(util.inspect(index, true, null));
+      _.each(shows, download);
+      console.log(util.inspect(index, true, null));
     }
   });
-}//}}}
+}
 
-function makeDescObj(desc, url) {//{{{
+function makeDescObj(desc, url) {
   var arr = desc.split(";");
 
   var show = arr[0].split(":")[1].trim();
@@ -52,9 +50,9 @@ function makeDescObj(desc, url) {//{{{
     file: file,
     url: url
   };
-}//}}}
+}
 
-function filter(show) {//{{{
+function filter(show) {
   if (!config.season && (/all/i).test(show.episode)) {
     return false;
   }
@@ -62,7 +60,7 @@ function filter(show) {//{{{
   var pass = true;
   var re;
   _.each(config.regFalse, function(reg) {
-    re = new RegEx(reg, "i");
+    re = new RegExp(reg, "i");
     if (re.test(show.file)) {
       pass = false;
     }
@@ -70,7 +68,7 @@ function filter(show) {//{{{
 
   if (pass) {
     _.each(config.regTrue, function(reg) {
-      re = new RegEx(reg, "i");
+      re = new RegExp(reg, "i");
       if (!re.test(show.title)) {
         pass = false;
       }
@@ -78,9 +76,9 @@ function filter(show) {//{{{
   }
 
   return pass;
-}//}}}
+}
 
-function runIndex(shows) {//{{{
+function runIndex(shows) {
   var unseenShows = [];
   var unseen;
 
@@ -119,9 +117,9 @@ function runIndex(shows) {//{{{
     console.log("Error writting index");
   }
   return unseenShows;
-}//}}}
+}
 
-function download(show) {//{{{
+function download(show) {
   var command = config.wget + " -O '" + config.dir + show.file + "' '" + show.url + "'";
   console.log(command);
   var child = exec(command, function(error, stdout, stderr) {
@@ -131,7 +129,7 @@ function download(show) {//{{{
       console.log("exec error: " + error);
     }
   });
-}//}}}
+}
 
 function readIndex() {
   // need to check special cases:
@@ -168,5 +166,9 @@ function writeIndex() {
   return true;
 }
 
-//var id = setInterval(run, 5*60*1000);
+
+config = readConfig();
+console.log(config);
+
+//var id = setInterval(run, config.interval*60*1000);
 run();
